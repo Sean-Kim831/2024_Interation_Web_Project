@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ProtoType</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Gugi&display=swap" rel="stylesheet">
+    <style>
+        /* 기존 스타일 추가 */
+        body,
+        html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        #background-video {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: -1;
+        }
+
+        #back-button,
+        #about-back-button {
+            position: absolute;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 10px 20px;
+            background-color: rgba(0, 0, 0, 0.7);
+            border: 1px solid gray;
+            color: white;
+            border-radius: 4px;
+            cursor: pointer;
+            display: none;
+            z-index: 2;
+            transition: opacity 0.5s ease;
+        }
+
+        #back-button:hover,
+        #about-back-button:hover {
+            background-color: rgba(251, 247, 247, 0.9);
+        }
+
+        #content-iframe,
+        #about-content-iframe {
+            width: 100%;
+            height: 100vh;
+            border: none;
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            transition: opacity 0.5s ease;
+            opacity: 0;
+        }
+
+        #home {
+            display: flex;
+            height: calc(100vh - 100px); /* Adjust height based on header height */
+            position: relative;
+        }
+
+        #left-container {
+            width: 70%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: transparent;
+            overflow: hidden;
+            position: relative;
+        }
+
+        #three-container {
+            width: 30%;
+            height: 100vh;
+            position: relative;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        #three-container canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        header {
+            display: flex;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 20px; /* Increased padding for larger height */
+            z-index: 1;
+            width: 100%;
+            position: fixed;
+            top: 0;
+            font-size: larger;
+            font-family: "Gugi", sans-serif;
+        }
+
+        header img {
+            height: 80px; /* Adjusted height */
+            margin-right: 20px;
+            margin-left: 40px;
+
+        }
+
+        header h1 {
+            flex: 1;
+            margin: 0;
+            margin-right: 0;
+        }
+
+
+        nav {
+            display: flex;
+            gap: 20px; /* Adjusted gap for more spacing */
+            margin-left: auto; /* Pushes nav to the right */
+            margin-right: 8%; /* Adjust to desired position */
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 20px;
+            transition: transform 0.3s ease; /* 부드러운 전환 효과 추가 */
+
+        }
+
+        #H:hover,
+        #C:hover,
+        #A:hover,
+        #G:hover {
+            /* background-color: lightgrey; */
+            transform: scale(1.2); /* 크기 확대 */
+        }
+
+        nav.disabled a {
+            color: grey;
+            pointer-events: none;
+        }
+
+        footer {
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            text-align: center;
+            padding: 10px;
+            z-index: 1;
+            width: 100%;
+            position: fixed;
+            bottom: 0;
+        }
+
+        .section {
+            padding: 100px 20px;
+            min-height: 100vh;
+            box-sizing: border-box;
+            overflow: auto;
+        }
+
+        #about,
+        #contact,
+        #game {
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            /* margin-top: 50px; */
+            height: 100vh;
+            overflow-y: auto;
+        }
+
+        .about-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            padding: 20px;
+            transition: display 0.5s ease, opacity 0.5s ease;
+        }
+
+        @media (max-width: 800px) {
+            .about-content {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 500px) {
+            .about-content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .about-item {
+            background: white;
+            color: black;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            min-height: 350px;
+        }
+
+        .about-item:hover {
+            transform: scale(1.05);
+        }
+
+        #about h2 {
+            margin-top: 50px;
+        }
+
+        .exhibition-button {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border-radius: 4px;
+            text-decoration: none;
+            transition: background-color 0.3s ease;
+        }
+
+        .exhibition-button:hover {
+            background-color: #0056b3;
+        }
+
+        #contact h2 {
+            margin-top: 50px;
+        }
+
+        .icon-grid {
+            margin-top: 0px;
+            display: grid;
+            grid-template-columns: repeat(9, 1fr);
+            gap: 20px;
+            padding: 20px;
+        }
+
+        .icon-grid div {
+            background: white;
+            padding: 10px;
+            text-align: center;
+            border-radius: 8px;
+            transition: transform 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .icon-grid div:hover {
+            transform: scale(1.1);
+        }
+
+        .icon-grid img {
+            max-width: 80%;
+            max-height: 80%;
+        }
+
+        .contact-content {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 20px;
+            min-height: calc(100vh - 800px);
+            padding-top: 0;
+        }
+
+        .contact-form,
+        .contact-info,
+        .contact-map {
+            flex: 1;
+            min-width: 300px;
+        }
+
+        .contact-form input,
+        .contact-form textarea {
+            width: calc(100% - 22px);
+            padding: 10px;
+            margin-bottom: 10px;
+            border: none;
+            border-radius: 4px;
+        }
+
+        .contact-form button {
+            width: 100%;
+            padding: 10px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+
+        .contact-form button:hover {
+            background-color: #0056b3;
+        }
+
+        .contact-info,
+        .contact-map {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 8px;
+        }
+
+        #game iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+    </style>
+</head>
+
+<body>
+    <video id="background-video" autoplay loop muted>
+        <source src="videos/LandScape.mp4" type="video/mp4">
+        Your browser does not support the video tag.
+    </video>
+
+    <header>
+        <img src="images/FLOGO.png" alt="Logo">
+        <h1>청춘의 강원도, 낭만의 강원도</h1>
+        <!-- <h5>3D 미디어 전시관에 오신 것을 환영합니다.</h5> -->
+        <nav>
+            <a href="#home" id="H">Home</a>
+            <a href="#about" id="A">About</a>
+            <a href="#contact" id="C">Contact</a>
+            <a href="#game" id="G">Game</a>
+        </nav>
+    </header>
+    <div id="home">
+        <div id="left-container"></div>
+        <div id="three-container"></div>
+        <iframe id="content-iframe"></iframe>
+        <button id="back-button">Back</button>
+    </div>
+    <div id="about" class="section">
+        <h2>About</h2>
+        <p>3D 전시관은 총 여섯개의 섹션으로 전시관이 이루어져 있습니다.</p>
+        <div class="about-content">
+            <div class="about-item">
+                <h1>Mountain</h1>
+                <h3>01. 자연경관(산)</h3>
+                <p>강원도 18개의 시군을 대표하는 자연경관 중, 산을 소개하고 전시합니다.</p>
+                <a href="#" class="exhibition-button" data-link="0MountainGallery.html">전시관 이동</a>
+            </div>
+            <div class="about-item">
+                <h1>Sea</h1>
+                <h3>02. 자연경관(바다)</h3>
+                <p>강원도의 깨끗하고 아름다운 해변과 바다를 소개하고 전시합니다.</p>
+                <a href="#" class="exhibition-button" data-link="0SeaGallery.html">전시관 이동</a>
+            </div>
+            <div class="about-item">
+                <h1>Festival</h1>
+                <h3>03. 축제</h3>
+                <p>강원도에서 열리는 다양한 축제와 행사를 소개하고 전시합니다.</p>
+                <a href="#" class="exhibition-button" data-link="0FestivalGallery.html">전시관 이동</a>
+            </div>
+            <div class="about-item">
+                <h1>Food</h1>
+                <h3>04. 특산품</h3>
+                <p>강원도의 다양한 특산품을 소개하고 전시합니다.</p>
+                <a href="#" class="exhibition-button" data-link="0FoodGallery.html">전시관 이동</a>
+            </div>
+            <div class="about-item">
+                <h1>Film</h1>
+                <h3>05. 영화촬영소</h3>
+                <p>강원도에서 촬영된 영화와 촬영지를 소개하고 전시합니다.</p>
+                <a href="#" class="exhibition-button" data-link="0MovieGallery.html">전시관 이동</a>
+            </div>
+            <div class="about-item">
+                <h1>History</h1>
+                <h3>06. 역사문화유산</h3>
+                <p>강원도의 역사와 문화유산을 소개하고 전시합니다.</p>
+                <a href="#" class="exhibition-button" data-link="0TradGallery.html">전시관 이동</a>
+            </div>
+        </div>
+        <iframe id="about-content-iframe"></iframe>
+        <button id="about-back-button">Back</button>
+    </div>
+    <div id="contact" class="section">
+        <h2>Contact Us</h2>
+        <div class="contact-content">
+            <div class="contact-form">
+                <input type="text" placeholder="Name">
+                <input type="email" placeholder="Email">
+                <input type="phone" placeholder="Phone">
+                <textarea rows="20" placeholder="Message"></textarea>
+                <button>Send it</button>
+            </div>
+            <div class="contact-info" id="contact-info">
+                <p>강원도의 다양한 정보를 확인하세요.</p>
+                <p>아래의 시 군청 아이콘을 통해 각 지역 정보에 접근할 수 있습니다.</p>
+            </div>
+            <div class="contact-map">
+                <iframe id="google-map"
+                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d1613776.827855272!2d126.91134975587728!3d37.815626969636234!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x356237ec59968d89%3A0xe150c7d25a07a6e!2z6rCV7JuQ64-E!5e0!3m2!1sko!2skr!4v1718639824057!5m2!1sko!2skr"
+                    width="100%" height="100%" style="border:0" allowfullscreen></iframe>
+            </div>
+        </div>
+        <div class="icon-grid">
+            <div><a href="#" class="map-button"
+                    data-info='{"description": "강릉 시청", "tel": "033-660-2018", "email": "gangneungcity", "url": "https://www.gn.go.kr/"}'
+                    data-map="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3154.6224420942126!2d128.87337211234743!3d37.75200091335338!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3561ef6386191cd7%3A0x2379e2a595b03311!2z6rCV66aJ7Iuc7LKt!5e0!3m2!1sko!2skr!4v1718697298173!5m2!1sko!2skr"><img
+                        src="images/강릉.jpeg" alt="Icon 1"></a></div>
+            <div><a href="#" class="map-button"
+                    data-info='{"description": "고성 군청", "tel": "033-660-2012", "email": "https://www.gwgs.go.kr/", "url": "https://www.gwgs.go.kr/"}'
+                    data-map="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3127.634870748051!2d128.46547481236612!3d38.380567376915046!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x5fd8f28261e8414b%3A0x3c22eeb16728e934!2z6rOg7ISx6rWw7LKt!5e0!3m2!1sko!2skr!4v1718697465256!5m2!1sko!2skr" width="600" height="450" style="border:0;"><img
+                        src="images/고성.jpeg" alt="Icon 2"></a></div>
+            <div><a href="#" class="map-button"
+                    data-info='{"description": "동해 시청", "tel": "033-660-2012", "email": "https://www.dh.go.kr/www/index.do", "url": "https://www.dh.go.kr/www/index.do"}'
+                    data-map="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3170.0863791716915!2d129.11469711530658!3d37.13934711965482!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x357aa30de0d2b923%3A0x94b9232c2b44b78c!2z7LWc7J6w!5e0!3m2!1sko!2skr!4v1685092178434!5m2!1sko!2skr"><img
+                        src="images/동해.jpeg" alt="Icon 16"></a></div>
+            <div><a href="#" class="map-button"
+                    data-info='{"description": "삼척 시청", "tel": "033-660-2021", "email": "samcheok@example.com", "url": "www.samcheok.com"}'
+                    data-map="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3171.4200574711677!2d129.16708861530583!3d37.45139201965144!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x357ab8a4b1b2b7e5%3A0x3b8bda4b5a6a9c1d!2z7KaI7ZOB!5e0!3m2!1sko!2skr!4v1685092199046!5m2!1sko!2skr"><img
+                        src="images/삼척.png" alt="Icon 3"></a></div>
+            <div><a href="#" class="map-button"
+                    data-info='{"description": "속초 시청", "tel": "033-660-2021", "email": "sokcho@example.com", "url": "www.sokcho.com"}'
+                    data-map="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3169.251721392751!2d128.59134661530654!3d37.49495501964882!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x357ba104f07908ff%3A0x11260e9bc8b16efb!2z7IS87Zmp!5e0!3m2!1sko!2skr!4v1685092216548!5m2!1sko!2skr"><img
+                        src="images/속초.jpeg" alt="Icon 17"></a></div>
+            <div><a href="#" class="map-button"
+                    data-info='{"description": "양구 군청", "tel": "033-660-2021", "email": "yanggu@example.com", "url": "www.yanggu.com"}'
+                    data-map="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3158.9700227392543!2d127.9845486153119!3d38.10542097965589!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x357a725bb0ec2db7%3A0xf59798f68dc259a5!2z7ZaI6rSR!5e0!3m2!1sko!2skr!4v1685092236018!5m2!1sko!2skr"><img
+                        src="images/양구군.png" alt="Icon 4"></a></div>
+            <div><a href="#" class="map-button"
+                    data-info='{"description": "양양 군청", "tel": "033-660-2021", "email": "yangyang@example.com", "url": "www.yangyang.com"}'
+                    data-map="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3167.9345682686273!2d128.62089861530724!3d37.663529919644245!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x357ba6b15b98323f%3A0x9d6bb9e1d4d2f5b3!2z7ZaI6rSA!5e0!3m2!1sko!2skr!4v1685092254197!5m2!1sko!2skr"><img
+                        src="images/양양.jpeg" alt="Icon 5"></a></div>
+            <div><a href="#" class="map-button"
+                    data-info='{"description": "영월 군청", "tel": "033-660-2021", "email": "yeongwol@example.com", "url": "www.yeongwol.com"}'
+                    data-map="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3158.154708991681!2d128.4608673153124!3d38.12746487965468!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x357ba8f5d9c95747%3A0x38d52ad57b865f6!2z7ZW07JmA!5e0!3m2!1sko!2skr!4v1685092270921!5m2!1sko!2skr"><img
+                        src="images/영월.jpeg" alt="Icon 6"></a></div>
+            <div><a href="#" class="map-button"
+                    data-info='{"description": "원주 시청", "tel": "033-660-2021", "email": "wonju@example.com", "url": "www.wonju.com"}'
+                    data-map="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3166.1561290168757!2d127.95110831530815!3d37.34485571965516!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x357a9f7f1e108285%3A0x5a56af0b61c2cf2d!2z7J6Q7Iuc!5e0!3m2!1sko!2skr!4v1685092301842!5m2!1sko!2skr"><img
+                        src="images/원주.jpeg" alt="Icon 7"></a></div>
+            <div><a href="#" class="map-button"
+                    data-info='{"description": "인제 군청", "tel": "033-660-2021", "email": "inje@example.com", "url": "www.inje.com"}'
+                    data-map="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3155.617965785834!2d128.1846421153132!3d38.26905677965198!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x357ab11ff51995db%3A0x7d5c0b2bb34d10b!2z7KO87YSw!5e0!3m2!1sko!2skr!4v1685092318355!5m2!1sko!2skr"><img
+                        src="images/인제.gif" alt="Icon 8"></a></div>
+            <div><a href="#" class="map-button"
+                    data-info='{"description": "정선 군청", "tel": "033-660-2021", "email": "jeongseon@example.com", "url": "www.jeongseon.com"}'
+                    data-map="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3162.583939090151!2d128.66009861531037!3d37.383538519646955!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3579d41ea25a5dd1%3A0xd511c8e1b0676cb!2z7J207KeA!5e0!3m2!1sko!2skr!4v1685092335018!5m2!1sko!2skr"><img
+                        src="images/정선.jpeg" alt="Icon 9"></a></div>
+            <div><a href="#" class="map-button"
+                    data-info='{"description": "철원 군청", "tel": "033-660-2021", "email": "cheorwon@example.com", "url": "www.cheorwon.com"}'
+                    data-map="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3170.979313705688!2d127.31922831530614!3d38.146286119655!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x357aa6fced88b793%3A0x81eb1de1563fc5d3!2z7KCE7ZaJ7JuQ!5e0!3m2!1sko!2skr!4v1685092353898!5m2!1sko!2skr"><img
+                        src="images/철원군.png" alt="Icon 10"></a></div>
+            <div><a href="#" class="map-button"
+                    data-info='{"description": "춘천 시청", "tel": "033-660-2021", "email": "chuncheon@example.com", "url": "www.chuncheon.com"}'
+                    data-map="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3156.230588050895!2d127.71609831531292!3d37.87876701965819!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x357b45cf80f45d85%3A0x5aebb1b1b9d68f11!2z7J207I2s7KeA!5e0!3m2!1sko!2skr!4v1685092371367!5m2!1sko!2skr"><img
+                        src="images/춘천.jpeg" alt="Icon 11"></a></div>
+            <div><a href="#" class="map-button"
+                    data-info='{"description": "태백 시청", "tel": "033-660-2021", "email": "taebaek@example.com", "url": "www.taebaek.com"}'
+                    data-map="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3164.778731931894!2d128.96404031530904!3d37.126655119649135!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x357b0a2e1b4b1b59%3A0x1a0d3c9a177f3192!2z7LKt7JuQ!5e0!3m2!1sko!2skr!4v1685092388790!5m2!1sko!2skr"><img
+                        src="images/태백.jpeg" alt="Icon 15"></a></div>
+            <div><a href="#" class="map-button"
+                    data-info='{"description": "평창 군청", "tel": "033-660-2021", "email": "pyeongchang@example.com", "url": "www.pyeongchang.com"}'
+                    data-map="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3163.755364141104!2d128.38902131530954!3d37.545218319647724!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x357abf7a2c3d4b07%3A0x62e23b122d4e6d9!2z7IKs7J2Y!5e0!3m2!1sko!2skr!4v1685092406386!5m2!1sko!2skr"><img
+                        src="images/평창.png" alt="Icon 12"></a></div>
+            <div><a href="#" class="map-button"
+                    data-info='{"description": "홍천 군청", "tel": "033-660-2021", "email": "hongcheon@example.com", "url": "www.hongcheon.com"}'
+                    data-map="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3166.9709205100347!2d127.88722951530775!3d37.69496541964336!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x357ab7d171e321ff%3A0x1143a84ad5d22372!2z7ISc7ZWc!5e0!3m2!1sko!2skr!4v1685092422632!5m2!1sko!2skr"><img
+                        src="images/홍천군.jpeg" alt="Icon 13"></a></div>
+            <div><a href="#" class="map-button"
+                    data-info='{"description": "횡성 군청", "tel": "033-660-2021", "email": "hoengseong@example.com", "url": "www.hoengseong.com"}'
+                    data-map="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3167.792049526757!2d127.98620331530738!3d37.48282291964837!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x357ab19c2c8d17d9%3A0x1a1c1e1124e5e4d4!2z7LaI7Iuc7J24!5e0!3m2!1sko!2skr!4v1685092437985!5m2!1sko!2skr"><img
+                        src="images/횡성.jpg" alt="Icon 14"></a></div>
+            <div><a href="#" class="map-button"
+                    data-info='{"description": "화천 군청", "tel": "033-660-2021", "email": "hwacheon@example.com", "url": "www.hwacheon.com"}'
+                    data-map="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3156.9385065562155!2d127.7058243153124!3d37.97267291965698!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x357b95e6d1e4be5f%3A0x6637394abdb570db!2z7J247Iqk!5e0!3m2!1sko!2skr!4v1685092454337!5m2!1sko!2skr"><img
+                        src="images/화천.png" alt="Icon 18"></a></div>
+        </div>
+    </div>
+    <div id="game" class="section">
+        <h2>GangWon Marble</h2>
+        <iframe src="00_PrototypeWebFinal.html"></iframe>
+    </div>
+    <footer>
+        <p>&copy; 2024 Kim Dong Hyeon. All rights reserved.</p>
+        <p>Contact: coreiu0210@example.com</p>
+    </footer>
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three/examples/jsm/",
+                "three/addons/geometries/": "https://unpkg.com/three/examples/jsm/geometries/"
+            }
+        }
+    </script>
+    <script type="module">
+        import * as THREE from 'three';
+        import { TrackballControls } from 'three/addons/controls/TrackballControls.js';
+        import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
+
+        let scene, camera, renderer, controls, cube;
+        let raycaster = new THREE.Raycaster();
+        let mouse = new THREE.Vector2();
+        let isFloating = true; // 큐브가 둥둥 떠다니는지 여부
+
+        const links = [
+            '0MountainGallery.html',
+            '0FestivalGallery.html',
+            '0SeaGallery.html',
+            '0MovieGallery.html',
+            '0FoodGallery.html',
+            '0TradGallery.html',
+        ]; // 페이지 URL 링크
+
+        init();
+        animate();
+
+        function init() {
+            scene = new THREE.Scene();
+
+            const aspect = (window.innerWidth * 0.3) / window.innerHeight;
+            camera = new THREE.PerspectiveCamera(75, aspect, 0.1, 1000);
+            camera.position.set(0, -3, 5); // 카메라의 위치를 약간 아래로 설정하여 큐브를 위로 이동
+
+            renderer = new THREE.WebGLRenderer({ alpha: true });
+            renderer.setSize(window.innerWidth * 0.3, window.innerHeight); // 화면 오른쪽 30%에 맞추기
+            document.getElementById('three-container').appendChild(renderer.domElement);
+
+            controls = new TrackballControls(camera, renderer.domElement);
+            controls.minDistance = 4;
+            controls.maxDistance = 12;
+
+            controls.addEventListener('start', () => isFloating = false);
+            controls.addEventListener('end', () => isFloating = true);
+
+            const images = [
+                'images/산.jpeg',
+                'images/축제.jpeg',
+                'images/바다.png',
+                'images/영화.jpeg',
+                'images/감자.jpeg',
+                'images/전통.jpeg'
+            ];
+
+            const materials = images.map(image => {
+                const texture = new THREE.TextureLoader().load(image);
+                return new THREE.MeshLambertMaterial({ map: texture });
+            });
+
+            const geometry = new RoundedBoxGeometry(2, 2, 2, 5, 0.2);
+            cube = new THREE.Mesh(geometry, materials);
+            cube.position.set(0, 0, 0);
+            scene.add(cube);
+
+            const ambientLight = new THREE.AmbientLight(0xffffff, 1);
+            scene.add(ambientLight);
+
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 1.5);
+            directionalLight.position.set(5, 5, 5).normalize();
+            scene.add(directionalLight);
+
+            window.addEventListener('resize', onWindowResize);
+            document.addEventListener('dblclick', onDoubleClick, false);
+            document.getElementById('back-button').addEventListener('click', onBackButtonClick);
+
+            
+
+            // 지도 및 정보 변경 기능 추가
+            const buttons = document.querySelectorAll('.map-button');
+            buttons.forEach(button => {
+                button.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const info = JSON.parse(button.getAttribute('data-info'));
+                    const mapSrc = button.getAttribute('data-map');
+
+                    const contactInfo = document.getElementById('contact-info');
+                    contactInfo.innerHTML = `
+                        <p>${info.description}</p>
+                        <p>Tel: ${info.tel}</p>
+                        <p>Contact: ${info.email}</p>
+                        <p>URL: <a href="${info.url}" target="_blank">${info.url}</a></p>
+                    `;
+                    document.getElementById('google-map').src = mapSrc;
+                });
+            });
+        }
+
+        function onWindowResize() {
+            const width = window.innerWidth * 0.3;
+            const height = window.innerHeight;
+            camera.aspect = width / height;
+            camera.updateProjectionMatrix();
+            renderer.setSize(width, height);
+        }
+
+        function disableNav() {
+            const nav = document.querySelector('nav');
+            nav.classList.add('disabled');
+        }
+
+        function enableNav() {
+            const nav = document.querySelector('nav');
+            nav.classList.remove('disabled');
+        }
+
+        function onDoubleClick(event) {
+            event.preventDefault();
+
+            mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+            raycaster.setFromCamera(mouse, camera);
+            const intersects = raycaster.intersectObjects([cube]);
+
+            if (intersects.length > 0) {
+                const intersected = intersects[0].object;
+
+                // 색상 변경 효과 추가
+                const faceIndex = intersects[0].face.materialIndex;
+                const originalColor = intersected.material[faceIndex].color.clone();
+                intersected.material[faceIndex].color.set(0xaeaeae);
+
+                setTimeout(() => {
+                    intersected.material[faceIndex].color.copy(originalColor);
+
+                    // iframe으로 페이지 불러오기
+                    const iframe = document.getElementById('content-iframe');
+                    iframe.style.display = 'block';
+                    iframe.style.opacity = '1'; // 부드러운 전환 효과
+                    iframe.src = links[faceIndex];
+
+                    // 3D 큐브 숨기기
+                    document.getElementById('three-container').style.opacity = '0'; // 부드러운 전환 효과
+                    setTimeout(() => {
+                        document.getElementById('three-container').style.display = 'none';
+                        document.getElementById('back-button').style.display = 'block';
+                        disableNav();
+                    }, 500); // 0.5초 후에 숨김 처리
+                }, 300); // 300ms 딜레이 추가
+            }
+        }
+
+        function onBackButtonClick() {
+            // iframe 숨기기
+            const iframe = document.getElementById('content-iframe');
+            iframe.style.opacity = '0'; // 부드러운 전환 효과
+            setTimeout(() => {
+                iframe.style.display = 'none';
+                iframe.src = '';
+
+                // 3D 큐브 다시 보이기
+                document.getElementById('three-container').style.display = 'block';
+                document.getElementById('three-container').style.opacity = '1'; // 부드러운 전환 효과
+                document.getElementById('back-button').style.display = 'none';
+                enableNav();
+            }, 500); // 0.5초 후에 숨김 처리
+        }
+
+        function onAboutBackButtonClick() {
+            // About 섹션의 iframe 숨기기
+            const iframe = document.getElementById('about-content-iframe');
+            iframe.style.opacity = '0'; // 부드러운 전환 효과
+            setTimeout(() => {
+                iframe.style.display = 'none';
+                iframe.src = '';
+
+                // About 콘텐츠 다시 보이기
+                const aboutContent = document.querySelector('.about-content');
+                aboutContent.style.display = 'grid';
+                setTimeout(() => {
+                    aboutContent.style.opacity = '1'; // 부드러운 전환 효과
+                }, 50);
+                document.getElementById('about-back-button').style.display = 'none';
+                enableNav();
+            }, 500); // 0.5초 후에 숨김 처리
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+
+            if (isFloating) {
+                const time = Date.now() * 0.002;
+                cube.position.y = Math.sin(time) * 0.1;
+            }
+
+            controls.update();
+            renderer.render(scene, camera);
+        }
+
+        document.querySelectorAll('.exhibition-button').forEach((button) => {
+            button.addEventListener('click', function (e) {
+                e.preventDefault();
+                const link = button.getAttribute('data-link');
+                const iframe = document.getElementById('about-content-iframe');
+                iframe.src = link;
+                iframe.style.display = 'block';
+                iframe.style.opacity = '1'; // 부드러운 전환 효과
+
+                const aboutContent = document.querySelector('.about-content');
+                aboutContent.style.opacity = '0';
+                setTimeout(() => {
+                    aboutContent.style.display = 'none';
+                }, 500); // 0.5초 후에 숨김 처리
+                document.getElementById('about-back-button').style.display = 'block';
+                disableNav();
+            });
+        });
+
+        document.getElementById('about-back-button').addEventListener('click', onAboutBackButtonClick);
+    </script>
+    <script>
+        document.querySelectorAll('nav a').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+    </script>
+</body>
+
+</html>

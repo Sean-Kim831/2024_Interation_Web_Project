@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Responsive 3D Webpage Creation Tool</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+            background-color: #000000; /* 배경을 검은색으로 설정 */
+        }
+    </style>
+</head>
+<body>
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three/examples/jsm/",
+                "tween": "https://cdnjs.cloudflare.com/ajax/libs/tween.js/18.6.4/tween.esm.js"
+            }
+        }
+    </script>
+
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+        import TWEEN from 'tween';
+        import { EXRLoader } from 'three/addons/loaders/EXRLoader.js';
+
+        // HDRI 로드 및 설정
+        const exrLoader = new EXRLoader();
+        exrLoader.load('img/Rodong.exr', function(texture) {
+            texture.mapping = THREE.EquirectangularReflectionMapping;
+            scene.background = texture;
+            scene.environment = texture;
+        });
+
+        let scene, camera, renderer, controls;
+        const objects = [];
+        const tweens = [];
+        let isDragging = false;
+        let originalPosition = null;
+        let originalRotation = null;
+        let minX, maxX;
+        let hoveredObject = null;
+        let originalScale = new THREE.Vector3();
+
+        init();
+        generateObjects(); // 초기 객체 생성
+        animate();
+
+        document.addEventListener('keydown', onKeyDown);
+        document.addEventListener('mousemove', onMouseMove);
+        document.addEventListener('dblclick', onDoubleClick);
+
+        function init() {
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x000000); // 배경을 검은색으로 설정
+
+            const aspect = window.innerWidth / window.innerHeight;
+            camera = new THREE.PerspectiveCamera(75, aspect, 0.1, 1000);
+            camera.position.set(0, 0, 20);
+
+            renderer = new THREE.WebGLRenderer({ antialias: true }); // 안티앨리어싱을 켜서 더 부드러운 렌더링
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            document.body.appendChild(renderer.domElement);
+
+            controls = new OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.25;
+            controls.screenSpacePanning = false;
+            controls.minDistance = 10;
+            controls.maxDistance = 50;
+            controls.maxPolarAngle = Math.PI / 2;
+            controls.rotateSpeed = 0.5;
+            controls.zoomSpeed = 0.5;
+            controls.panSpeed = 0.5;
+            controls.mouseButtons = {
+                LEFT: THREE.MOUSE.LEFT,
+                MIDDLE: THREE.MOUSE.MIDDLE,
+                RIGHT: null
+            };
+
+            // 조명을 조정하여 밝기를 낮춥니다.
+            const ambientLight = new THREE.AmbientLight(0xffffff, 1.5); // 환경광을 줄입니다.
+            scene.add(ambientLight);
+
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 2.0); // 방향광을 추가합니다.
+            directionalLight.position.set(1, 1, 1).normalize();
+            scene.add(directionalLight);
+
+            window.addEventListener('resize', onWindowResize);
+        }
+
+        function generateObjects() {
+            objects.forEach(obj => scene.remove(obj));
+            tweens.forEach(tween => TWEEN.remove(tween));
+            objects.length = 0;
+            tweens.length = 0;
+
+            const width = 8;
+            const height = 6;
+            const depth = 1; // 두께를 더 증가시킴
+            const count = 6;
+
+            const gap = 4;
+            const startX = -(count - 1) * (width + gap) / 2;
+            minX = startX - width / 2;
+            maxX = startX + (count - 1) * (width + gap) + width / 2;
+
+            const imagesFront = [
+                'images/M1.png',
+                'images/M2.png',
+                'images/M3.png',
+                'images/M4.png',
+                'images/M5.png',
+                'images/M6.png',
+            ];
+
+            const imagesBack = [
+                'images/M11.png',
+                'images/M22.png',
+                'images/M33.png',
+                'images/M44.png',
+                'images/M55.png',
+                'images/M66.png',
+            ];
+
+            for (let i = 0; i < count; i++) {
+                const geometry = new THREE.BoxGeometry(width, height, depth);
+                
+                const textureFront = new THREE.TextureLoader().load(imagesFront[i]);
+                const textureBack = new THREE.TextureLoader().load(imagesBack[i]);
+
+                // 재질 설정을 변경하여 이미지를 더 정확하게 표시합니다.
+                const materialFront = new THREE.MeshPhongMaterial({ map: textureFront, shininess: 10 });
+                const materialBack = new THREE.MeshPhongMaterial({ map: textureBack, shininess: 10 });
+                const materialSides = new THREE.MeshPhongMaterial({ color: 0x888888, transparent: true, opacity: 0.3 });
+
+                const materials = [
+                    materialSides,
+                    materialSides,
+                    materialSides,
+                    materialSides,
+                    materialFront,
+                    materialBack
+                ];
+
+                const object = new THREE.Mesh(geometry, materials);
+                object.position.set(startX + i * (width + gap), 0, 0);
+
+                const tween = new TWEEN.Tween(object.position)
+                    .to({ y: [0.5, 0] }, 2000)
+                    .interpolation(TWEEN.Interpolation.Bezier)
+                    .repeat(Infinity)
+                    .yoyo(true)
+                    .start();
+
+                tweens.push(tween);
+                scene.add(object);
+                objects.push(object);
+            }
+        }
+
+        function onDoubleClick(event) {
+            const mouse = new THREE.Vector2(
+                (event.clientX / window.innerWidth) * 2 - 1,
+                -(event.clientY / window.innerHeight) * 2 + 1
+            );
+
+            const raycaster = new THREE.Raycaster();
+            raycaster.setFromCamera(mouse, camera);
+
+            const intersects = raycaster.intersectObjects(objects);
+
+            if (intersects.length > 0) {
+                const intersected = intersects[0].object;
+
+                if (!intersected.userData.isFlipping) {
+                    intersected.userData.isFlipping = true;
+
+                    new TWEEN.Tween(intersected.rotation)
+                        .to({ y: intersected.rotation.y + Math.PI }, 1000)
+                        .onComplete(() => intersected.userData.isFlipping = false)
+                        .start();
+                }
+            }
+        }
+
+        function onMouseMove(event) {
+            const mouse = new THREE.Vector2(
+                (event.clientX / window.innerWidth) * 2 - 1,
+                -(event.clientY / window.innerHeight) * 2 + 1
+            );
+
+            const raycaster = new THREE.Raycaster();
+            raycaster.setFromCamera(mouse, camera);
+
+            const intersects = raycaster.intersectObjects(objects);
+
+            if (intersects.length > 0) {
+                const intersected = intersects[0].object;
+
+                if (hoveredObject !== intersected) {
+                    if (hoveredObject) {
+                        new TWEEN.Tween(hoveredObject.scale)
+                            .to(originalScale, 300)
+                            .start();
+                    }
+
+                    hoveredObject = intersected;
+                    originalScale.copy(intersected.scale);
+
+                    new TWEEN.Tween(intersected.scale)
+                        .to({ x: originalScale.x * 1.1, y: originalScale.y * 1.1, z: originalScale.z * 1.1 }, 300)
+                        .start();
+                }
+            } else if (hoveredObject) {
+                new TWEEN.Tween(hoveredObject.scale)
+                    .to(originalScale, 300)
+                    .start();
+                hoveredObject = null;
+            }
+        }
+
+        function onKeyDown(event) {
+            const moveDistance = 1;
+            switch (event.key) {
+                case 'A':
+                case 'a':
+                    if (camera.position.x - moveDistance >= minX) {
+                        camera.position.x -= moveDistance;
+                        controls.target.x -= moveDistance;
+                    }
+                    break;
+                case 'D':
+                case 'd':
+                    if (camera.position.x + moveDistance <= maxX) {
+                        camera.position.x += moveDistance;
+                        controls.target.x += moveDistance;
+                    }
+                    break;
+                case 'W':
+                case 'w':
+                    if (camera.position.z - moveDistance >= controls.minDistance) {
+                        camera.position.z -= moveDistance;
+                    }
+                    break;
+                case 'S':
+                case 's':
+                    if (camera.position.z + moveDistance <= controls.maxDistance) {
+                        camera.position.z += moveDistance;
+                    }
+                    break;
+            }
+        }
+
+        function onWindowResize() {
+            const aspect = window.innerWidth / window.innerHeight;
+            camera.aspect = aspect;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            controls.update();
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            TWEEN.update();
+            controls.update();
+            renderer.render(scene, camera);
+        }
+    </script>
+</body>
+</html>
