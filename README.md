@@ -9,7 +9,8 @@
 **기술스택**: HTML, CSS, JavaScript
 
 **라이브러리 및 프레임워크**
-  - JQUERY
+  - JQUERY<img width="172" alt="image" src="https://github.com/user-attachments/assets/b8682999-4196-445e-bc00-58328165aef8">
+
 ![image](https://github.com/user-attachments/assets/59c25983-0e15-4685-852c-356ec5877b9a)
 
   - 
