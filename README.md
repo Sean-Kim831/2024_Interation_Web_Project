@@ -122,34 +122,33 @@
 
 **Resource** :
 
-강원관광 :
+- 강원관광 :
 https://www.gangwon.to/gwtour
 
-강원특별자치도청 :
+- 강원특별자치도청 :
 https://state.gwd.go.kr/portal
 
-18개 시 군청 아이콘 이미지 :
+- 18개 시 군청 아이콘 이미지 :
 각 시군청 홈페이지
 
 **Media** : 
 
-SKY Mediaworks
+- SKY Mediaworks
 구름위의 땅- 강원도 홍보영상
 URL : https://youtu.be/UADr2Wl2uDE?si=K2W6xyK7s0PbIDGR
 
 **Mapping&Modeling** :
-
-Mapping Background : Polyhaven
+- Mapping Background : Polyhaven
 https://polyhaven.com/hdris
 
-Modeling: GRABCAD
+- Modeling: GRABCAD
 https://grabcad.com/library
 
 **IDEA** : 
 
-Landing Page : Apple https://www.apple.com/kr/
+- Landing Page : Apple https://www.apple.com/kr/
 
-DESIGN : 미구엘 슈발리에 특별전 https://www.aquaplanet.co.kr/jeju/kor/miguel_jeju/index.html#blog
+- DESIGN : 미구엘 슈발리에 특별전 https://www.aquaplanet.co.kr/jeju/kor/miguel_jeju/index.html#blog
 
 ## 결론
 **서비스 제작** : 
